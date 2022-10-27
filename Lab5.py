@@ -31,22 +31,23 @@ def fcfs(p, p_dict):
         counter = i + 1
 
     print('FCFC:\n')
-    print('\t\tPID\tArrival\t\tStart Time\tEnd Time\tRunning\tWaiting')
-    print('\t\t\t\tTime\t\t\t\t\tTime\tTime\n')
+    print('\t\tPID\tArrival\t\tStart Time\tEnd Time\tRunning\t\tWaiting')
+    print('\t\t\tTime\t\t\t\tTime\t\tTime\n')
     counter = 0
     start_time = 0
+    curr_burst = 0
     ordered_p = list(fcfs_dict.keys())
     wait_arr = []
     while True:
-        if fcfs_dict[ordered_p[0]][1] == counter:
-            waiting_time = counter - fcfs_dict[ordered_p[0]][1]
+        if fcfs_dict[ordered_p[0]][1] == curr_burst:
+            waiting_time = start_time - fcfs_dict[ordered_p[0]][0]
             running_time = counter - start_time
             wait_arr.append(waiting_time)
-            print("\t\t"+ordered_p[0]+"\t"+fcfs_dict[ordered_p[0]][0]+"\t\t"+start_time+"\t"+counter+"\t"+running_time
-                  +"\t"+waiting_time+"\n")
+            print("\t\t"+str(ordered_p[0])+"\t"+str(fcfs_dict[ordered_p[0]][0])+"\t\t"+str(start_time)+"\t\t"+str(counter)+"\t\t"+str(running_time)+"\t\t"+str(waiting_time)+"\n")
             start_time = counter
             ordered_p.pop(0)
         counter += 1
+        curr_burst = counter - start_time
         if not ordered_p:
             break
     average_wait = average(wait_arr)
