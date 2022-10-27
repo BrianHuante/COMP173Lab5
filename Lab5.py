@@ -56,9 +56,9 @@ def fcfs(p, p_dict):
 
 def rr(p, p_dict, time_inter):
     rr_dict = {}
-    final_dict = p_dict
+    final_dict = p_dict.copy()
     for process, value in final_dict.items():
-        value = [value[0], 0, 0, 0]
+        final_dict[process] = [value[0], 0, 0, 0]
     counter = 0
     for i in range(p):
         lowestStartProcess = list(p_dict.keys())[0]
@@ -79,34 +79,42 @@ def rr(p, p_dict, time_inter):
 
     print('RR: (Time quantum = '+str(time_inter)+')\n')
     print('\t\tPID\tStart Time\tEnd Time\tRunning')
-    print('\t\t\t\t\t\t\t\t\t\t\tTime\n')
+    print('\t\t\t\t\t\t\tTime\n')
     counter = 0
+    iteration_counter = 0
     p_counter = 0
     start_time = 0
     curr_burst = 0
     ordered_p = list(rr_dict.keys())
     wait_arr = []
     while True:
-        if (counter + 1) % time_inter == 0 or rr_dict[ordered_p[p_counter]][1] == curr_burst:
-            waiting_time = start_time - final_dict[p_counter][0]
-            final_dict[p_counter][0] = counter
+        if (iteration_counter + 1) % (time_inter + 1) == 0 or rr_dict[ordered_p[p_counter]][1] == curr_burst:
+            iteration_counter = 0
+            waiting_time = start_time - final_dict[ordered_p[p_counter]][0]
+            final_dict[ordered_p[p_counter]][1] += waiting_time
+            final_dict[ordered_p[p_counter]][0] = counter
             running_time = counter - start_time
-            final_dict[p_counter][2] += (counter - start_time)
-            final_dict[p_counter][3] = counter
+            final_dict[ordered_p[p_counter]][2] += running_time
+            final_dict[ordered_p[p_counter]][3] = counter
             print("\t\t" + str(ordered_p[p_counter]) + "\t" + str(start_time) + "\t\t" + str(counter) + "\t\t" + str(running_time) + "\n")
             start_time = counter
             if rr_dict[ordered_p[p_counter]][1] == curr_burst:
                 ordered_p.pop(p_counter)
-                final_dict[p_counter][1] += waiting_time
-            p_counter = (p_counter + 1) % len(ordered_p)
+                if p_counter >= len(ordered_p):
+                    p_counter = 0
+            else:
+                rr_dict[ordered_p[p_counter]][1] -= time_inter
+                if len(ordered_p) != 1:
+                    p_counter += 1
         counter += 1
+        iteration_counter += 1
         curr_burst = counter - start_time
         if not ordered_p:
             break
-    print('\t\tPID\tArrival\t\tRunning\tEnd Time\t\tWaiting')
-    print('\t\t\tTime\t\tTime\t\t\tTime\n')
+    print('\n\n\t\tPID\tArrival\t\tRunning\t\tEnd Time\tWaiting')
+    print('\t\t\tTime\t\tTime\t\tTime\n')
     for process, value in final_dict.items():
-        print("\t\t" + str(process) + "\t" + str(rr_dict[ordered_p[0]][0]) + "\t\t" + str(value[2]) + "\t\t" + str(value[3]) + "\t\t" + str(value[1]) + "\n")
+        print("\t\t" + str(process) + "\t" + str(rr_dict[process][0]) + "\t\t" + str(value[2]) + "\t\t" + str(value[3]) + "\t\t" + str(value[1]) + "\n")
         wait_arr.append(value[1])
     average_wait = average(wait_arr)
     print("Average Waiting Time: ", round(average_wait, 2))
