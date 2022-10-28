@@ -10,8 +10,8 @@ def average(lst):
     return sum(lst) / len(lst)
 
 
-def fcfs(p, p_dict):
-    fcfs_dict = {}
+def sort_pdict(p, p_dict):
+    return_dict = {}
     counter = 0
     for i in range(p):
         lowestStartProcess = list(p_dict.keys())[0]
@@ -26,9 +26,14 @@ def fcfs(p, p_dict):
                 lowestStartProcess = process
             counter += 1
 
-        fcfs_dict[lowestStartProcess] = p_dict[lowestStartProcess]
+        return_dict[lowestStartProcess] = p_dict[lowestStartProcess]
         p_dict.pop(lowestStartProcess)
         counter = i + 1
+    return return_dict
+
+
+def fcfs(p, p_dict):
+    fcfs_dict = sort_pdict(p, p_dict)
 
     print('FCFC:\n')
     print('\t\tPID\tArrival\t\tStart Time\tEnd Time\tRunning\t\tWaiting')
@@ -55,27 +60,11 @@ def fcfs(p, p_dict):
 
 
 def rr(p, p_dict, time_inter):
-    rr_dict = {}
     final_dict = p_dict.copy()
     for process, value in final_dict.items():
         final_dict[process] = [value[0], 0, 0, 0]
-    counter = 0
-    for i in range(p):
-        lowestStartProcess = list(p_dict.keys())[0]
-        for process, valueArr in p_dict.items():
-            if counter == i:
-                counter += 1
-                continue
-            if valueArr[0] == p_dict[lowestStartProcess][0]:
-                if process < lowestStartProcess:
-                    lowestStartProcess = process
-            elif valueArr[0] < p_dict[lowestStartProcess][0]:
-                lowestStartProcess = process
-            counter += 1
 
-        rr_dict[lowestStartProcess] = p_dict[lowestStartProcess]
-        p_dict.pop(lowestStartProcess)
-        counter = i + 1
+    rr_dict = sort_pdict(p, p_dict)
 
     print('RR: (Time quantum = '+str(time_inter)+')\n')
     print('\t\tPID\tStart Time\tEnd Time\tRunning')
@@ -120,6 +109,50 @@ def rr(p, p_dict, time_inter):
     print("Average Waiting Time: ", round(average_wait, 2))
 
 
+def sjf(p, p_dict):
+    sjf_dict = sort_pdict(p, p_dict)
+
+    print('SJF:\n')
+    print('\t\tPID\tArrival\t\tStart Time\tEnd Time\tRunning\t\tWaiting')
+    print('\t\t\tTime\t\t\t\tTime\t\tTime\n')
+    counter = 0
+    p_counter = -1
+    p_lock = 0
+    p_done = []
+    wait_counter = 0
+    exit_num = len(list(sjf_dict.keys()))
+    start_time = 0
+    curr_burst = 0
+    wait_arr = []
+    sjf_dict[-1] = [-1, -1]
+    while True:
+        if p_lock == 0:
+            for process, value in sjf_dict.items():
+                if process in p_done or process == -1:
+                    continue
+                if counter >= sjf_dict[process][0]:
+                    if sjf_dict[process][1] < sjf_dict[p_counter][1] or p_counter == -1:
+                        p_counter = process
+            p_lock = 1
+        if sjf_dict[p_counter][1] == curr_burst and p_lock == 1:
+            waiting_time = start_time - sjf_dict[p_counter][0]
+            running_time = counter - start_time
+            wait_arr.append(waiting_time)
+            print("\t\t" + str(p_counter) + "\t" + str(sjf_dict[p_counter][0]) + "\t\t" + str(
+                start_time) + "\t\t" + str(counter) + "\t\t" + str(running_time) + "\t\t" + str(waiting_time) + "\n")
+            start_time = counter
+            p_done.append(p_counter)
+            p_counter = -1
+            wait_counter += 1
+            p_lock = 0
+        counter += 1
+        curr_burst = counter - start_time
+        if wait_counter == exit_num:
+            break
+    average_wait = average(wait_arr)
+    print("Average Waiting Time: ", round(average_wait, 2))
+
+
 n = len(sys.argv)
 if n < 3:
     sys.exit("Not enough values in command line.")
@@ -136,3 +169,5 @@ if sys.argv[2] == "fcfs":
     fcfs(numProcesses, processDict)
 elif sys.argv[2] == "rr":
     rr(numProcesses, processDict, int(sys.argv[3]))
+elif sys.argv[2] == "sjf":
+    sjf(numProcesses, processDict)
