@@ -77,27 +77,32 @@ def rr(p, p_dict, time_inter):
     ordered_p = list(rr_dict.keys())
     wait_arr = []
     while True:
-        if (iteration_counter + 1) % (time_inter + 1) == 0 or rr_dict[ordered_p[p_counter]][1] == curr_burst:
-            iteration_counter = 0
-            waiting_time = start_time - final_dict[ordered_p[p_counter]][0]
-            final_dict[ordered_p[p_counter]][1] += waiting_time
-            final_dict[ordered_p[p_counter]][0] = counter
-            running_time = counter - start_time
-            final_dict[ordered_p[p_counter]][2] += running_time
-            final_dict[ordered_p[p_counter]][3] = counter
-            print("\t\t" + str(ordered_p[p_counter]) + "\t" + str(start_time) + "\t\t" + str(counter) + "\t\t" + str(running_time) + "\n")
-            start_time = counter
-            if rr_dict[ordered_p[p_counter]][1] == curr_burst:
-                ordered_p.pop(p_counter)
-                if p_counter >= len(ordered_p):
-                    p_counter = 0
-            else:
-                rr_dict[ordered_p[p_counter]][1] -= time_inter
-                if len(ordered_p) != 1:
-                    p_counter += 1
-        counter += 1
-        iteration_counter += 1
-        curr_burst = counter - start_time
+        if p_counter == len(ordered_p):
+            p_counter = 0
+        if start_time >= rr_dict[ordered_p[p_counter]][0]:
+            if (iteration_counter + 1) % (time_inter + 1) == 0 or rr_dict[ordered_p[p_counter]][1] == curr_burst:
+                iteration_counter = 0
+                waiting_time = start_time - final_dict[ordered_p[p_counter]][0]
+                final_dict[ordered_p[p_counter]][1] += waiting_time
+                final_dict[ordered_p[p_counter]][0] = counter
+                running_time = counter - start_time
+                final_dict[ordered_p[p_counter]][2] += running_time
+                final_dict[ordered_p[p_counter]][3] = counter
+                print("\t\t" + str(ordered_p[p_counter]) + "\t" + str(start_time) + "\t\t" + str(counter) + "\t\t" + str(running_time) + "\n")
+                start_time = counter
+                if rr_dict[ordered_p[p_counter]][1] == curr_burst:
+                    ordered_p.pop(p_counter)
+                    if p_counter >= len(ordered_p):
+                        p_counter = 0
+                else:
+                    rr_dict[ordered_p[p_counter]][1] -= time_inter
+                    if len(ordered_p) != 1:
+                        p_counter += 1
+            counter += 1
+            iteration_counter += 1
+            curr_burst = counter - start_time
+        else:
+            p_counter += 1
         if not ordered_p:
             break
     print('\n\n\t\tPID\tArrival\t\tRunning\t\tEnd Time\tWaiting')
